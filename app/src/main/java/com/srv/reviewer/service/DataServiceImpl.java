@@ -11,13 +11,15 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataServiceImpl implements DataService{
+public class DataServiceImpl extends DataService{
+
+    private String path = "https://happyworkshop.tistory.com";
 
     @Override
-    public ArrayList<ReViewVO> getContentsList(String path, ArrayList<ReViewVO> reViewerList) {
-
+    public ArrayList<ReViewVO> getContentsList(ArrayList<ReViewVO> reViewerList) {
+        String subPath = "/category/Enjoy?page="+getPage();
         try {
-            Document doc = Jsoup.connect(path).get();
+            Document doc = Jsoup.connect(path + subPath).get();
             Elements contents = doc.select("#dkContent");
             contents = contents.select("#mArticle");
             contents = contents.select("div.list_content");
@@ -33,7 +35,7 @@ public class DataServiceImpl implements DataService{
 
                 ReViewVO vo = new ReViewVO();
                 vo.setTitle(name);
-                String url = "https://hotissueone.tistory.com" + link;
+                String url = path + link;
 
                 vo.setLinkUrl(getContetns(url));
 

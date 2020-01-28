@@ -17,7 +17,7 @@ import android.os.Bundle;
 public class movieActivity extends Activity {
 
     String pathUrl = "";
-    ProgressDialog progressDialog;
+    CustomDialog progressDialog;
 
     private BackPressCloseHandler backPressCloseHandler;
 
@@ -40,10 +40,13 @@ public class movieActivity extends Activity {
         videoView.requestFocus();
         videoView.start();
 
-        progressDialog =  ProgressDialog.show(this, "Please wait....", "Retrieving data......", true);
+        progressDialog = new CustomDialog(this);
+        progressDialog.setTitle("LOADING.....");
+        progressDialog.show();
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+
                 progressDialog.dismiss();
             }
         });
@@ -52,9 +55,9 @@ public class movieActivity extends Activity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         //backPressCloseHandler.onBackPressed();
-        progressDialog.cancel();
-        videoView.stopPlayback();
+        progressDialog.dismiss();
         this.finish();
     }
 

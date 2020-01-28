@@ -11,11 +11,14 @@
             android:id="@+id/swipyrefreshlayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srl_direction="both" tools:ignore="MissingConstraints">
+            app:srl_direction="both" tools:ignore="MissingConstraints" tools:layout_editor_absoluteY="0dp"
+            tools:layout_editor_absoluteX="0dp">
 
         <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" tools:layout_editor_absoluteY="0dp"
-                tools:layout_editor_absoluteX="3dp" android:id="@+id/listView"/>
+                tools:layout_editor_absoluteX="3dp" android:id="@+id/listView">
+
+        </ListView>
     </com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
