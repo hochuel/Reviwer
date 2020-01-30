@@ -10,12 +10,13 @@
     <RelativeLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent" tools:layout_editor_absoluteY="40dp"
+            tools:layout_editor_absoluteX="0dp">
 
         <com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout
                 android:id="@+id/swipyrefreshlayout"
                 android:layout_width="match_parent"
-                android:layout_height="677dp"
+                android:layout_height="match_parent"
                 app:srl_direction="both" tools:ignore="MissingConstraints" tools:layout_editor_absoluteY="0dp"
                 tools:layout_editor_absoluteX="0dp">
 
