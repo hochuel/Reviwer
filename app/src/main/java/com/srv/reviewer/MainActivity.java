@@ -1,20 +1,19 @@
 package com.srv.reviewer;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
+import android.view.*;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.ads.*;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
@@ -55,7 +54,24 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()){
             case R.id.menu01:
-                Toast.makeText(this, "첫번째 메뉴", Toast.LENGTH_SHORT).show();
+                /*
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("INFO").setMessage("Email : hochuel@gmail.com");
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int id){
+                        //Toast.makeText(getApplicationContext(), "OK Click", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+                */
+
+                ProgrammerInfoDialog programmerInfoDialog = new ProgrammerInfoDialog(this, "", "hochuel@gmail.com");
+                programmerInfoDialog.setCancelable(true);
+                programmerInfoDialog.getWindow().setGravity(Gravity.CENTER);
+                programmerInfoDialog.show();
                 return true;
         }
 
@@ -64,8 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Log.d("@@MainActivity msg1","onBackPressed");
-        Toast.makeText(getApplicationContext(),"onBackPressed",Toast.LENGTH_SHORT).show();
+        //Log.d("@@MainActivity msg1","onBackPressed");
+        //Toast.makeText(getApplicationContext(),"onBackPressed",Toast.LENGTH_SHORT).show();
 
         if (mInterstitialAd.isLoaded()) {
             mInterstitialAd.show();
@@ -77,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         } else {
-            Log.d("@@MainActivity msg2","onBackPressed");
             super.onBackPressed();
         }
 
