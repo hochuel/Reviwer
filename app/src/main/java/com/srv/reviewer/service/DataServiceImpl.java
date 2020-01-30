@@ -45,6 +45,7 @@ public class DataServiceImpl extends DataService{
             }
 
         } catch (IOException e) {
+            reViewerList = null;
             e.printStackTrace();
         }
 

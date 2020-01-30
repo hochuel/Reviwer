@@ -6,10 +6,12 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -33,20 +35,30 @@ public class movieActivity extends Activity {
         pathUrl = intent.getExtras().getString("moveUrl");
 
         videoView = findViewById(R.id.videoView);
-        MediaController mediaController = new MediaController(this);
+        final MediaController mediaController = new MediaController(this);
         videoView.setMediaController(mediaController);
 
         videoView.setVideoPath(pathUrl);
         videoView.requestFocus();
-        videoView.start();
+        //videoView.start();
+
+        videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+
+                Toast.makeText(getApplicationContext(), "재생 할 수 없는 동영상 입니다.", Toast.LENGTH_LONG).show();
+                //System.out.println("MovieError :: not play......");
+                onBackPressed();
+                return false;
+            }
+        });
 
         progressDialog = new CustomDialog(this);
-        progressDialog.setTitle("LOADING.....");
         progressDialog.show();
         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
-
+                videoView.start();
                 progressDialog.dismiss();
             }
         });

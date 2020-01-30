@@ -1,60 +1,132 @@
 package com.srv.reviewer;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
+import com.google.android.gms.ads.*;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
 import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
 import com.srv.reviewer.adapter.ReviwerAdater;
 import com.srv.reviewer.service.DataService;
 import com.srv.reviewer.service.DataServiceImpl;
 import com.srv.reviewer.vo.ReViewVO;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<ReViewVO> reViewerList;
     private ReviwerAdater reviwerAdater;
-
     private SwipyRefreshLayout swipyRefreshLayout;
-
     private int page = 1;
-
     Handler mHandler = new Handler();
-
     private CustomDialog customDialog;
+    private AdView mAdView;
+
+    private DataService dataService;
+
+
+    private InterstitialAd mInterstitialAd;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.mainmenu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.menu01:
+                Toast.makeText(this, "첫번째 메뉴", Toast.LENGTH_SHORT).show();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d("@@MainActivity msg1","onBackPressed");
+        Toast.makeText(getApplicationContext(),"onBackPressed",Toast.LENGTH_SHORT).show();
+
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+            mInterstitialAd.setAdListener(new AdListener() {
+                @Override
+                public void onAdClosed() {
+                    // 사용자가 광고를 닫으면 뒤로가기 이벤트를 발생시킨다.
+                    finish();
+                }
+            });
+        } else {
+            Log.d("@@MainActivity msg2","onBackPressed");
+            super.onBackPressed();
+        }
+
+
+        mInterstitialAd.setAdListener(new AdListener() {
+            public void onAdLoaded(){
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                } else {
+                    Log.d("@@ADMOB...$$", "The interstitial wasn't loaded yet.");
+
+
+                }
+            }
+        });
+
+        super.onBackPressed();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dataService = new DataServiceImpl();
+
+        /*광고달기 시작*/
+        MobileAds.initialize(this, getString(R.string.admob_app_id));
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId(getString(R.string.banner_ad_unit_id_for_test));
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+/*
+        mInterstitialAd.setAdListener(new AdListener() {
+            public void onAdLoaded(){
+                if (mInterstitialAd.isLoaded()) {
+                    mInterstitialAd.show();
+                } else {
+                    Log.d("@@ADMOB...$$", "The interstitial wasn't loaded yet.");
+                }
+            }
+        });
+*/
+        /*광고달기 끝...*/
 
         customDialog = new CustomDialog(this);
-
         reViewerList = new ArrayList<ReViewVO>();
 
         Object[] obj = null;
-        UrlParseDataTask task = new UrlParseDataTask(this);
+        UrlParseDataTask task = new UrlParseDataTask(this, dataService);
         task.execute(obj);
 
         ListView listView = (ListView)findViewById(R.id.listView);
@@ -85,6 +157,9 @@ public class MainActivity extends AppCompatActivity {
 
                     GetDataThread getDataThread = new GetDataThread();
                     getDataThread.setSwipyRefreshLayout(swipyRefreshLayout);
+
+                    dataService.setPage(page);
+                    getDataThread.setDataService(dataService);
                     getDataThread.start();
                 }else{
                     swipyRefreshLayout.setRefreshing(false);
@@ -99,6 +174,15 @@ public class MainActivity extends AppCompatActivity {
     private class GetDataThread extends Thread{
 
         private SwipyRefreshLayout swipyRefreshLayout;
+        private DataService dataService;
+
+        public DataService getDataService() {
+            return dataService;
+        }
+
+        public void setDataService(DataService dataService) {
+            this.dataService = dataService;
+        }
 
         public SwipyRefreshLayout getSwipyRefreshLayout() {
             return swipyRefreshLayout;
@@ -110,18 +194,13 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void run() {
-            DataService dataService = new DataServiceImpl();
-            dataService.setPage(page);
             dataService.getContentsList(reViewerList);
-
-
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     reviwerAdater.notifyDataSetChanged();
                 }
             });
-
             swipyRefreshLayout.setRefreshing(false);
         }
     }
@@ -130,17 +209,16 @@ public class MainActivity extends AppCompatActivity {
     private class UrlParseDataTask extends AsyncTask {
         private Context mContext;
         private ProgressBar progressBar;
+        private DataService dataService;
 
-        public UrlParseDataTask(Context context) {
+        public UrlParseDataTask(Context context, DataService dataService) {
             mContext = context;
+            this.dataService = dataService;
         }
 
         @Override
         protected List doInBackground(Object[] objects) {
-
-            DataService dataService = new DataServiceImpl();
             dataService.getContentsList(reViewerList);
-
             return reViewerList;
         }
 

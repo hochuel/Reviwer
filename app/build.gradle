@@ -29,6 +29,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.jsoup/jsoup
     implementation 'org.jsoup:jsoup:1.12.1'
-
     compile 'com.github.orangegangsters:swipy:1.2.3@aar'
+    implementation 'com.google.android.gms:play-services-ads:18.3.0'
 }
